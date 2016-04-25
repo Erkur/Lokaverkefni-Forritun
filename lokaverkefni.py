@@ -40,21 +40,29 @@ def typeracer():
     #countdown til byrjunar (3 sec)
     countdownLabel = tk.Label(root)
     countdownLabel.place(x=200, y=200)
+
+    def toggle():
+        global started
+        started = True
+        countdownToStart(3)
+        
     
     def countdownToStart(count):
-        global max_len
-        startButton.configure(state=DISABLED)
-        countdownLabel['text'] = count
-        if count > 0:
-            # call countdown again after 1000ms (1s)
-            root.after(1000, countdownToStart, count-1)
-        elif count == 0:
-            textbox.configure(background="white", state=NORMAL)
-            textbox.focus()
-            countdownLabel['text'] = "GO!"
-            timer(60)
+        global started
+        if started:
+            global max_len
+            startButton.configure(state=DISABLED)
+            countdownLabel['text'] = count
+            if count > 0:
+                # call countdown again after 1000ms (1s)
+                root.after(1000, countdownToStart, count-1)
+            elif count == 0:
+                textbox.configure(background="white", state=NORMAL)
+                textbox.focus()
+                countdownLabel['text'] = "GO!"
+                timer(60)
 
-    startButton = Button(root, text="Start", command=lambda: countdownToStart(3))
+    startButton = Button(root, text="Start", command=toggle)
     startButton.pack()
     startButton.place(x=185, y=50)
 
@@ -66,6 +74,11 @@ def typeracer():
         global wordsCorrect
         global wordsIncorrect
         global keyCount
+        global started
+        countdownLabel['text'] = " "
+        timerLabel['text'] = " "
+        
+        started = False
         sec = 0
         wordsCount = 0
         wordsCorrect = 0
@@ -73,28 +86,34 @@ def typeracer():
         keyCount = 0
         startButton.configure(state=NORMAL)
             
-    restartButton = Button(root, text="Restart", command=restart())
+    restartButton = Button(root, text="Restart", command=restart)
     restartButton.pack()
     restartButton.place(x=250, y=50)
 
     #telur niður 60 sec
     
     def timer(sec):
-        timerLabel['text'] = sec
-        if sec > 0:
-            # call countdown again after 1000ms (1s)
-            root.after(1000, timer, sec-1)
-        elif sec == 0:
-            startButton.configure(state=NORMAL)
-            textbox.configure(background="#FF9999", state=DISABLED)
-            timerLabel['text'] = "TIMER OVER!"
-            showWPM(keyCount, wordsIncorrect, timeMin)
+        global started
+        if started:
+            timerLabel['text'] = sec
+            if sec > 0:
+                # call countdown again after 1000ms (1s)
+                root.after(1000, timer, sec-1)
+                showWPM(keyCount, wordsIncorrect, timeMin)
+            elif sec == 0:
+                textbox.delete(0, END)
+                startButton.configure(state=NORMAL)
+                textbox.configure(background="#FF9999", state=DISABLED)
+                timerLabel['text'] = "TIMER OVER!"
+                
 
     def showWPM(entries, errors, t):
-        print (((entries/5) - errors) / t)
-        print ("keycount: ", keyCount)
-        print ("incorrect words: ",wordsIncorrect)
-        print ("minutes: ",timeMin)
+        calculate = (((entries/5) - errors) / t)
+        rounded = "%.2f" % calculate
+        timerLabel = tk.Label(root)
+        timerLabel.configure(text=rounded)
+        timerLabel.pack()
+        timerLabel.place(x=300, y=30)
     
     #birtir nýtt orð
     def newWord():
