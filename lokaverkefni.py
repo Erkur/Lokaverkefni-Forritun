@@ -1,8 +1,9 @@
 from tkinter import *
 import tkinter as tk
+from time import *
 import random
 import string
-import time
+
 
 #talninga breytur
 wordsCount = 0
@@ -15,7 +16,7 @@ def main():
     global root
     root=Tk()
     root.title("Typeracer")
-    root.geometry("400x400")
+    root.geometry("600x400")
     root.configure(background='#f1ffff')
     typeracer()
     root.mainloop()
@@ -33,7 +34,7 @@ def typeracer():
     wordListLabel.place(x=80, y=5)
 
     #entry boxið fyrir orðinn
-    textbox = tk.Entry(root, background='#FF9999', state=DISABLED)
+    textbox = tk.Entry(root, disabledbackground='#E77471', state=DISABLED)
     textbox.pack()
     textbox.place(x=145, y=30)
 
@@ -41,8 +42,30 @@ def typeracer():
     countdownLabel = tk.Label(root)
     countdownLabel.place(x=200, y=200)
 
+    #Listbox fyrir wpm
+    global listbox
+    listbox = Listbox(root,width=24, height=22)
+    listbox.pack()
+    listbox.place(y=20,x=400)
+
+    #Label fyrir ofan listbox
+    listboxLabelDT = tk.Label(root, text="Date and time", background="#f1ffff")
+    listboxLabelDT.pack()
+    listboxLabelDT.place(x=415,y=0)
+    listboxLabelWPM = tk.Label(root, text="WPM", background="#f1ffff")
+    listboxLabelWPM.pack()
+    listboxLabelWPM.place(x=510,y=0)
+
     def toggle():
         global started
+        global wordsCount
+        global wordsCorrect
+        global wordsIncorrect
+        global keyCount
+        wordsCount = 0
+        wordsCorrect = 0
+        wordsIncorrect = 0
+        keyCount = 0
         started = True
         countdownToStart(3)
         
@@ -60,7 +83,7 @@ def typeracer():
                 textbox.configure(background="white", state=NORMAL)
                 textbox.focus()
                 countdownLabel['text'] = "GO!"
-                timer(60)
+                timer(10)
 
     startButton = Button(root, text="Start", command=toggle)
     startButton.pack()
@@ -94,20 +117,24 @@ def typeracer():
     
     def timer(sec):
         global started
+        global listbox
+        global rounded
         if started:
             timerLabel['text'] = sec
             if sec > 0:
                 # call countdown again after 1000ms (1s)
                 root.after(1000, timer, sec-1)
-                showWPM(keyCount, wordsIncorrect, timeMin)
             elif sec == 0:
+                showWPM(keyCount, wordsIncorrect, timeMin)
                 textbox.delete(0, END)
                 startButton.configure(state=NORMAL)
                 textbox.configure(background="#FF9999", state=DISABLED)
                 timerLabel['text'] = "TIMER OVER!"
+                listbox.insert(END, strftime("%Y-%m-%d %H:%M:%S", gmtime()) + " | " + rounded)
                 
-
+                
     def showWPM(entries, errors, t):
+        global rounded
         calculate = (((entries/5) - errors) / t)
         rounded = "%.2f" % calculate
         timerLabel = tk.Label(root)
@@ -156,7 +183,7 @@ def typeracer():
             print (wordsList[0])
             print (textbox.get())
             incorrectWord()
-            
+        
     root.bind("<space>", spacePressed)  
     count_flag = True   
 
