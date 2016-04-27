@@ -206,8 +206,9 @@ def typeracer():
         aboutNewWindow.protocol("WM_DELETE_WINDOW", back) 
 
     #about takki
-    aboutButton = Button(root, text="About", command=aboutWindow)
+    aboutButton = Button(root, text="About", command=aboutWindow, height= 1, width=10)
     aboutButton.pack()
+    aboutButton.place(x=150, y= 280)
     
     #start takkinn
     startButton = Button(root, text="Start", command=toggle, height= 1, width=10)
